@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'storyblok' => [
+        'api_key' => env('STORYBLOK_API_KEY'),
+    ],
+
 ];
