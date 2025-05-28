@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Article;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 
@@ -10,11 +11,14 @@ class StoryblokService
     protected string $apiKey;
     protected string $apiVersion = 'v2';
     protected string $baseUrl = 'https://api.storyblok.com';
-    protected int $cacheTime = 3600; // Cache for 1 hour by default
+    protected int $cacheTime;
+    protected string $version;
 
     public function __construct()
     {
-        $this->apiKey = config('services.storyblok.api_key');
+        $this->apiKey = config('storyblok.api_key');
+        $this->cacheTime = config('storyblok.cache_duration', 3600);
+        $this->version = config('storyblok.version', 'published');
     }
 
     /**
@@ -34,15 +38,22 @@ class StoryblokService
                 'per_page' => $perPage,
                 'page' => $page,
                 'content_type' => 'article', // Assuming you have an 'article' content type in Storyblok
-                'version' => 'published',
+                'version' => $this->version,
                 'sort_by' => 'published_at:desc',
             ]);
 
             if ($response->successful()) {
-                return $response->json();
+                $data = $response->json();
+                
+                // Map stories to Article models
+                if (isset($data['stories']) && is_array($data['stories'])) {
+                    $data['articles'] = $this->mapStoriesToArticles($data['stories']);
+                }
+                
+                return $data;
             }
 
-            return ['stories' => [], 'total' => 0, 'error' => $response->status()];
+            return ['stories' => [], 'articles' => [], 'total' => 0, 'error' => $response->status()];
         });
     }
 
@@ -59,14 +70,21 @@ class StoryblokService
         return Cache::remember($cacheKey, $this->cacheTime, function () use ($slug) {
             $response = Http::get("{$this->baseUrl}/{$this->apiVersion}/cdn/stories/{$slug}", [
                 'token' => $this->apiKey,
-                'version' => 'published',
+                'version' => $this->version,
             ]);
 
             if ($response->successful()) {
-                return $response->json();
+                $data = $response->json();
+                
+                // Map story to Article model
+                if (isset($data['story'])) {
+                    $data['article'] = $this->mapStoryToArticle($data['story']);
+                }
+                
+                return $data;
             }
 
-            return ['story' => null, 'error' => $response->status()];
+            return ['story' => null, 'article' => null, 'error' => $response->status()];
         });
     }
 
@@ -93,15 +111,22 @@ class StoryblokService
                         'in' => $category
                     ]
                 ],
-                'version' => 'published',
+                'version' => $this->version,
                 'sort_by' => 'published_at:desc',
             ]);
 
             if ($response->successful()) {
-                return $response->json();
+                $data = $response->json();
+                
+                // Map stories to Article models
+                if (isset($data['stories']) && is_array($data['stories'])) {
+                    $data['articles'] = $this->mapStoriesToArticles($data['stories']);
+                }
+                
+                return $data;
             }
 
-            return ['stories' => [], 'total' => 0, 'error' => $response->status()];
+            return ['stories' => [], 'articles' => [], 'total' => 0, 'error' => $response->status()];
         });
     }
 
@@ -124,15 +149,22 @@ class StoryblokService
                 'page' => $page,
                 'content_type' => 'article',
                 'search_term' => $query,
-                'version' => 'published',
+                'version' => $this->version,
                 'sort_by' => 'published_at:desc',
             ]);
 
             if ($response->successful()) {
-                return $response->json();
+                $data = $response->json();
+                
+                // Map stories to Article models
+                if (isset($data['stories']) && is_array($data['stories'])) {
+                    $data['articles'] = $this->mapStoriesToArticles($data['stories']);
+                }
+                
+                return $data;
             }
 
-            return ['stories' => [], 'total' => 0, 'error' => $response->status()];
+            return ['stories' => [], 'articles' => [], 'total' => 0, 'error' => $response->status()];
         });
     }
 
@@ -155,5 +187,29 @@ class StoryblokService
     public function clearAllCaches(): void
     {
         Cache::flush();
+    }
+    
+    /**
+     * Map Storyblok stories to Article models
+     *
+     * @param array $stories
+     * @return array
+     */
+    protected function mapStoriesToArticles(array $stories): array
+    {
+        return array_map(function ($story) {
+            return Article::fromStoryblok($story);
+        }, $stories);
+    }
+    
+    /**
+     * Map a single Storyblok story to an Article model
+     *
+     * @param array $story
+     * @return Article|null
+     */
+    protected function mapStoryToArticle(array $story): ?Article
+    {
+        return $story ? Article::fromStoryblok($story) : null;
     }
 }
