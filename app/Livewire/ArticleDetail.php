@@ -22,7 +22,7 @@ class ArticleDetail extends Component
     {
         $storyblokService = app(StoryblokService::class);
         $response = $storyblokService->getArticle($this->slug);
-        
+
         if (isset($response['article'])) {
             $this->article = $response['article'];
         } else {

@@ -43,11 +43,11 @@
             
             <div class="prose max-w-none">
                 @if($article->content)
-                    {!! $article->content !!}
+                    {!! $article->getRenderedContent() !!}
                 @endif
             </div>
             
-            @if($article->categories)
+            @if(!empty($article->categories))
                 <livewire:related-articles :current-slug="$article->slug" :categories="$article->categories" />
             @endif
             

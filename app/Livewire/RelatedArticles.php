@@ -15,7 +15,16 @@ class RelatedArticles extends Component
     public function mount($currentSlug, $categories = [], $limit = 3)
     {
         $this->currentSlug = $currentSlug;
-        $this->categories = $categories;
+        
+        // Ensure categories is always an array
+        if (is_string($categories)) {
+            $this->categories = [$categories];
+        } elseif (is_array($categories)) {
+            $this->categories = $categories;
+        } else {
+            $this->categories = [];
+        }
+        
         $this->limit = $limit;
     }
     

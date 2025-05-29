@@ -39,7 +39,7 @@ class ArticleList extends Component
     public function render()
     {
         $storyblokService = app(StoryblokService::class);
-        $page = $this->page;
+        $page = $this->getPage();
         
         // Get articles based on filters
         if (!empty($this->searchQuery)) {
@@ -64,7 +64,7 @@ class ArticleList extends Component
     public function paginationView()
     {
         $storyblokService = app(StoryblokService::class);
-        $page = $this->page;
+        $page = $this->getPage();
         
         // Get total from the appropriate method based on filters
         if (!empty($this->searchQuery)) {

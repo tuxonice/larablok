@@ -10,4 +10,9 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    // Force HTTPS for assets
+    server: {
+        https: true,
+        host: '0.0.0.0',
+    },
 });
