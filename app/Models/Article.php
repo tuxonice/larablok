@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
 
-class Article
+class Article extends Model
 {
     public $uuid;
     public $slug;
@@ -29,12 +29,12 @@ class Article
     public static function fromStoryblok(array $storyblokData): self
     {
         $article = new static();
-        
+
         // Map Storyblok fields to our model
         $article->uuid = $storyblokData['uuid'] ?? null;
         $article->slug = $storyblokData['slug'] ?? null;
         $article->name = $storyblokData['name'] ?? null;
-        
+
         // Content fields
         $content = $storyblokData['content'] ?? [];
         $article->title = $content['title'] ?? $article->name;
@@ -43,20 +43,20 @@ class Article
         $article->featured_image = $content['featured_image']['filename'] ?? null;
         $article->categories = $content['categories'] ?? [];
         $article->author = $content['author'] ?? null;
-        
+
         // Dates
-        $article->published_at = $storyblokData['published_at'] 
-            ? Carbon::parse($storyblokData['published_at']) 
+        $article->published_at = $storyblokData['published_at']
+            ? Carbon::parse($storyblokData['published_at'])
             : null;
-        
-        $article->created_at = $storyblokData['created_at'] 
-            ? Carbon::parse($storyblokData['created_at']) 
+
+        $article->created_at = $storyblokData['created_at']
+            ? Carbon::parse($storyblokData['created_at'])
             : null;
-        
-        $article->updated_at = $storyblokData['updated_at'] 
-            ? Carbon::parse($storyblokData['updated_at']) 
+
+        $article->updated_at = $storyblokData['updated_at']
+            ? Carbon::parse($storyblokData['updated_at'])
             : null;
-        
+
         return $article;
     }
 
@@ -68,7 +68,8 @@ class Article
      */
     public function formattedDate(string $format = 'F d, Y'): ?string
     {
-        return $this->published_at ? $this->published_at->format($format) : null;
+//        return $this->published_at ? $this->published_at->format($format) : null;
+        return $this->published_at;
     }
 
     /**
@@ -82,16 +83,16 @@ class Article
         if ($this->teaser) {
             return $this->teaser;
         }
-        
+
         // Strip HTML and truncate content
         $text = strip_tags($this->getRenderedContent());
         if (strlen($text) <= $length) {
             return $text;
         }
-        
+
         return substr($text, 0, $length) . '...';
     }
-    
+
     /**
      * Render the Storyblok rich text content as HTML
      *
@@ -103,21 +104,21 @@ class Article
         if (is_string($this->content)) {
             return $this->content;
         }
-        
+
         // If content is null or empty, return empty string
         if (empty($this->content)) {
             return '';
         }
-        
+
         // If content is a rich text object from Storyblok
         if (is_array($this->content) && isset($this->content['content'])) {
             return $this->renderRichText($this->content);
         }
-        
+
         // Fallback: convert to string if possible
         return (string) $this->content;
     }
-    
+
     /**
      * Recursively render Storyblok rich text content
      *
@@ -127,17 +128,17 @@ class Article
     protected function renderRichText(array $richText): string
     {
         $html = '';
-        
+
         // Process the content array
         if (isset($richText['content']) && is_array($richText['content'])) {
             foreach ($richText['content'] as $block) {
                 $html .= $this->renderBlock($block);
             }
         }
-        
+
         return $html;
     }
-    
+
     /**
      * Render a single rich text block
      *
@@ -148,7 +149,7 @@ class Article
     {
         $type = $block['type'] ?? '';
         $content = '';
-        
+
         // Recursively process child content
         if (isset($block['content']) && is_array($block['content'])) {
             foreach ($block['content'] as $child) {
@@ -157,12 +158,12 @@ class Article
         } elseif (isset($block['text'])) {
             $content = htmlspecialchars($block['text']);
         }
-        
+
         // Apply marks (bold, italic, etc.)
         if (isset($block['marks']) && is_array($block['marks'])) {
             foreach ($block['marks'] as $mark) {
                 $markType = $mark['type'] ?? '';
-                
+
                 switch ($markType) {
                     case 'bold':
                         $content = '<strong>' . $content . '</strong>';
@@ -188,7 +189,7 @@ class Article
                 }
             }
         }
-        
+
         // Wrap content based on block type
         switch ($type) {
             case 'heading':

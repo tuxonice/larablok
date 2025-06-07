@@ -92,7 +92,7 @@ class WarmStoryblokCache extends Command
         // Extract and cache categories
         if (isset($articlesResponse['articles']) && count($articlesResponse['articles']) > 0) {
             $this->info('Caching articles by category...');
-            
+
             // Extract unique categories
             $categories = [];
             foreach ($articlesResponse['articles'] as $article) {
@@ -104,18 +104,18 @@ class WarmStoryblokCache extends Command
                     }
                 }
             }
-            
+
             $this->info('Found ' . count($categories) . ' categories.');
-            
+
             if (count($categories) > 0) {
                 $bar = $this->output->createProgressBar(count($categories));
                 $bar->start();
-                
+
                 foreach ($categories as $category) {
                     $this->storyblokService->getArticlesByCategory($category, 10, 1);
                     $bar->advance();
                 }
-                
+
                 $bar->finish();
                 $this->newLine();
             }

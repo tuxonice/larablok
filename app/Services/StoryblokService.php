@@ -44,12 +44,12 @@ class StoryblokService
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 // Map stories to Article models
                 if (isset($data['stories']) && is_array($data['stories'])) {
                     $data['articles'] = $this->mapStoriesToArticles($data['stories']);
                 }
-                
+
                 return $data;
             }
 
@@ -75,12 +75,12 @@ class StoryblokService
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 // Map story to Article model
                 if (isset($data['story'])) {
                     $data['article'] = $this->mapStoryToArticle($data['story']);
                 }
-                
+
                 return $data;
             }
 
@@ -117,12 +117,12 @@ class StoryblokService
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 // Map stories to Article models
                 if (isset($data['stories']) && is_array($data['stories'])) {
                     $data['articles'] = $this->mapStoriesToArticles($data['stories']);
                 }
-                
+
                 return $data;
             }
 
@@ -155,12 +155,12 @@ class StoryblokService
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 // Map stories to Article models
                 if (isset($data['stories']) && is_array($data['stories'])) {
                     $data['articles'] = $this->mapStoriesToArticles($data['stories']);
                 }
-                
+
                 return $data;
             }
 
@@ -188,7 +188,7 @@ class StoryblokService
     {
         Cache::flush();
     }
-    
+
     /**
      * Map Storyblok stories to Article models
      *
@@ -201,7 +201,7 @@ class StoryblokService
             return Article::fromStoryblok($story);
         }, $stories);
     }
-    
+
     /**
      * Map a single Storyblok story to an Article model
      *

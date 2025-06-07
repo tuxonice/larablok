@@ -30,6 +30,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Force HTTPS
+    |--------------------------------------------------------------------------
+    |
+    | This value determines whether URLs should be forced to use HTTPS.
+    | Set this to true if you want to force all URLs to use HTTPS,
+    | regardless of the environment.
+    |
+    */
+
+    'force_https' => env('FORCE_HTTPS', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

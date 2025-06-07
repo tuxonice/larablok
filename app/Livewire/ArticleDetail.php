@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\Article;
 use App\Services\StoryblokService;
 use Livewire\Component;
 
@@ -21,7 +20,7 @@ class ArticleDetail extends Component
     protected function loadArticle()
     {
         $storyblokService = app(StoryblokService::class);
-        $response = $storyblokService->getArticle($this->slug);
+        $response = $storyblokService->getArticle('article/'.$this->slug);
 
         if (isset($response['article'])) {
             $this->article = $response['article'];
